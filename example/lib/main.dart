@@ -11,7 +11,9 @@ class MyApp extends StatelessWidget {
   final calendarController = CleanCalendarController(
     minDate: DateTime.now(),
     maxDate: DateTime.now().add(const Duration(days: 365)),
-    onRangeSelected: (firstDate, secondDate) {},
+    onRangeSelected: (firstDate, secondDate) {
+      print('heyyyyy');
+    },
     onDayTapped: (date) {},
     // readOnly: true,
     onPreviousMinDateTapped: (date) {},
@@ -61,10 +63,36 @@ class MyApp extends StatelessWidget {
         //     calendarController.jumpToMonth(date: DateTime(2022, 8));
         //   },
         // ),
-        body: ScrollableCleanCalendar(
-          calendarController: calendarController,
-          layout: Layout.BEAUTY,
-          calendarCrossAxisSpacing: 0,
+        body: ListView(
+          children: [
+            AspectRatio(
+              aspectRatio: .8,
+              child: ScrollableCleanCalendar(
+                calendarController: calendarController,
+                spaceBetweenMonthAndCalendar: 0,
+                // scrollController: ScrollController(),
+                layout: Layout.BEAUTY,
+                dayRadius: 100,
+                daySelectedBackgroundColor: Colors.black,
+                daySelectedBackgroundColorBetween: Colors.black.withOpacity(.3),
+                dayTextStyle: TextStyle(fontSize: 14),
+                calendarMainAxisSpacing: 0,
+                calendarCrossAxisSpacing: 0,
+                monthTextStyle: TextStyle(
+                  color: Color(0xFF222222),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                ),
+                weekdayTextStyle: TextStyle(
+                  color: Color(0xFF222222),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+                scrollDirection: Axis.horizontal,
+              ),
+            ),
+            Placeholder()
+          ],
         ),
       ),
     );

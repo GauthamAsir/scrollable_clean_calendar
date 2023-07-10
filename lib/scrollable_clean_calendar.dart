@@ -11,11 +11,18 @@ import 'package:scrollable_clean_calendar/widgets/weekdays_widget.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class ScrollableCleanCalendar extends StatefulWidget {
+
+  /// Listview direction
+  final Axis scrollDirection;
+
   /// The language locale
   final String locale;
 
   /// Scroll controller
   final ScrollController? scrollController;
+
+  /// PageController if scroll direction is horizontal
+  final PageController? pageController;
 
   /// If is to show or not the weekdays in calendar
   final bool showWeekdays;
@@ -80,31 +87,33 @@ class ScrollableCleanCalendar extends StatefulWidget {
   /// The controller of ScrollableCleanCalendar
   final CleanCalendarController calendarController;
 
-  const ScrollableCleanCalendar({
-    this.locale = 'en',
-    this.scrollController,
-    this.showWeekdays = true,
-    this.layout,
-    this.calendarCrossAxisSpacing = 4,
-    this.calendarMainAxisSpacing = 4,
-    this.spaceBetweenCalendars = 24,
-    this.spaceBetweenMonthAndCalendar = 24,
-    this.padding,
-    this.monthBuilder,
-    this.weekdayBuilder,
-    this.dayBuilder,
-    this.monthTextAlign,
-    this.monthTextStyle,
-    this.weekdayTextStyle,
-    this.daySelectedBackgroundColor,
-    this.dayBackgroundColor,
-    this.daySelectedBackgroundColorBetween,
-    this.dayDisableBackgroundColor,
-    this.dayDisableColor,
-    this.dayTextStyle,
-    this.dayRadius = 6,
-    required this.calendarController,
-  }) : assert(layout != null ||
+  const ScrollableCleanCalendar(
+      {this.locale = 'en',
+      this.scrollController,
+      this.showWeekdays = true,
+      this.layout,
+      this.calendarCrossAxisSpacing = 4,
+      this.calendarMainAxisSpacing = 4,
+      this.spaceBetweenCalendars = 24,
+      this.spaceBetweenMonthAndCalendar = 24,
+      this.padding,
+      this.monthBuilder,
+      this.weekdayBuilder,
+      this.dayBuilder,
+      this.monthTextAlign,
+      this.monthTextStyle,
+      this.weekdayTextStyle,
+      this.daySelectedBackgroundColor,
+      this.dayBackgroundColor,
+      this.daySelectedBackgroundColorBetween,
+      this.dayDisableBackgroundColor,
+      this.dayDisableColor,
+      this.dayTextStyle,
+      this.dayRadius = 6,
+      required this.calendarController,
+      this.pageController,
+      this.scrollDirection = Axis.vertical})
+      : assert(layout != null ||
             (monthBuilder != null &&
                 weekdayBuilder != null &&
                 dayBuilder != null));
@@ -129,16 +138,17 @@ class _ScrollableCleanCalendarState extends State<ScrollableCleanCalendar> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.scrollController != null) {
-      return listViewCalendar();
-    } else {
-      return scrollablePositionedListCalendar();
-    }
+    return widget.scrollDirection == Axis.horizontal
+        ? pageViewCalendar()
+        : widget.scrollController != null
+            ? listViewCalendar()
+            : scrollablePositionedListCalendar();
   }
 
   Widget listViewCalendar() {
     return ListView.separated(
       controller: widget.scrollController,
+      scrollDirection: widget.scrollDirection,
       padding: widget.padding ??
           const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
       separatorBuilder: (_, __) =>
@@ -152,11 +162,31 @@ class _ScrollableCleanCalendarState extends State<ScrollableCleanCalendar> {
     );
   }
 
+  Widget pageViewCalendar() {
+    return Padding(
+      padding: widget.padding ??
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+      child: PageView.builder(
+        controller: widget.pageController,
+        scrollDirection: widget.scrollDirection,
+        // separatorBuilder: (_, __) =>
+        //     SizedBox(height: widget.spaceBetweenCalendars),
+        itemCount: widget.calendarController.months.length,
+        itemBuilder: (context, index) {
+          final month = widget.calendarController.months[index];
+
+          return childCollumn(month);
+        },
+      ),
+    );
+  }
+
   Widget scrollablePositionedListCalendar() {
     return ScrollablePositionedList.separated(
       itemScrollController: widget.calendarController.itemScrollController,
       padding: widget.padding ??
           const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+      scrollDirection: widget.scrollDirection,
       separatorBuilder: (_, __) =>
           SizedBox(height: widget.spaceBetweenCalendars),
       itemCount: widget.calendarController.months.length,
@@ -185,6 +215,7 @@ class _ScrollableCleanCalendarState extends State<ScrollableCleanCalendar> {
         ),
         SizedBox(height: widget.spaceBetweenMonthAndCalendar),
         Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             WeekdaysWidget(
               showWeekdays: widget.showWeekdays,

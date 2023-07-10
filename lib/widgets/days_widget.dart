@@ -65,6 +65,7 @@ class DaysWidget extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       addRepaintBoundaries: false,
       padding: EdgeInsets.zero,
+      childAspectRatio: 1,
       crossAxisSpacing: calendarCrossAxisSpacing,
       mainAxisSpacing: calendarMainAxisSpacing,
       shrinkWrap: true,
@@ -214,6 +215,10 @@ class DaysWidget extends StatelessWidget {
   Widget _beauty(BuildContext context, DayValues values) {
     BorderRadiusGeometry? borderRadius;
     Color bgColor = Colors.transparent;
+
+    BorderRadiusGeometry? overlayBorderRadius;
+    Color overlayBgColor = Colors.transparent;
+
     TextStyle txtStyle =
         (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
       color: backgroundColor != null
@@ -228,11 +233,13 @@ class DaysWidget extends StatelessWidget {
 
     if (values.isSelected) {
       if (values.isFirstDayOfWeek) {
+        // borderRadius = BorderRadius.all(Radius.circular(radius));
         borderRadius = BorderRadius.only(
           topLeft: Radius.circular(radius),
           bottomLeft: Radius.circular(radius),
         );
       } else if (values.isLastDayOfWeek) {
+        // borderRadius = BorderRadius.all(Radius.circular(radius));
         borderRadius = BorderRadius.only(
           topRight: Radius.circular(radius),
           bottomRight: Radius.circular(radius),
@@ -245,6 +252,8 @@ class DaysWidget extends StatelessWidget {
               values.day.isSameDay(values.selectedMaxDate!))) {
         bgColor =
             selectedBackgroundColor ?? Theme.of(context).colorScheme.primary;
+        overlayBgColor = selectedBackgroundColorBetween ??
+            Theme.of(context).colorScheme.primary.withOpacity(.3);
         txtStyle =
             (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
           color: selectedBackgroundColor != null
@@ -259,13 +268,15 @@ class DaysWidget extends StatelessWidget {
           borderRadius = BorderRadius.circular(radius);
         } else if (values.selectedMinDate != null &&
             values.day.isSameDay(values.selectedMinDate!)) {
-          borderRadius = BorderRadius.only(
+          borderRadius = BorderRadius.all(Radius.circular(radius));
+          overlayBorderRadius = BorderRadius.only(
             topLeft: Radius.circular(radius),
             bottomLeft: Radius.circular(radius),
           );
         } else if (values.selectedMaxDate != null &&
             values.day.isSameDay(values.selectedMaxDate!)) {
-          borderRadius = BorderRadius.only(
+          borderRadius = BorderRadius.all(Radius.circular(radius));
+          overlayBorderRadius = BorderRadius.only(
             topRight: Radius.circular(radius),
             bottomRight: Radius.circular(radius),
           );
@@ -282,6 +293,13 @@ class DaysWidget extends StatelessWidget {
               : null,
         );
       }
+
+      if (values.selectedMinDate != null && values.selectedMaxDate == null) {
+        overlayBorderRadius = BorderRadius.all(Radius.circular(radius));
+      } else if (values.selectedMinDate == null &&
+          values.selectedMaxDate != null) {
+        overlayBorderRadius = BorderRadius.all(Radius.circular(radius));
+      }
     } else if (values.day.isSameDay(values.minDate)) {
     } else if (values.day.isBefore(values.minDate) ||
         values.day.isAfter(values.maxDate)) {
@@ -295,16 +313,22 @@ class DaysWidget extends StatelessWidget {
       );
     }
 
-    return Container(
-      alignment: Alignment.center,
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: borderRadius,
+        color: overlayBgColor,
+        borderRadius: overlayBorderRadius,
       ),
-      child: Text(
-        values.text,
-        textAlign: TextAlign.center,
-        style: txtStyle,
+      child: Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: borderRadius,
+        ),
+        child: Text(
+          values.text,
+          textAlign: TextAlign.center,
+          style: txtStyle,
+        ),
       ),
     );
   }

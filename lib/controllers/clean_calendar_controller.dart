@@ -95,18 +95,22 @@ class CleanCalendarController extends ChangeNotifier {
     while (today.weekday != weekdayStart) {
       today = today.subtract(const Duration(days: 1));
     }
-    final dateFormat = DateFormat(DateFormat.ABBR_WEEKDAY, locale);
     final daysOfWeek = [
-      dateFormat.format(today),
-      dateFormat.format(today.add(const Duration(days: 1))),
-      dateFormat.format(today.add(const Duration(days: 2))),
-      dateFormat.format(today.add(const Duration(days: 3))),
-      dateFormat.format(today.add(const Duration(days: 4))),
-      dateFormat.format(today.add(const Duration(days: 5))),
-      dateFormat.format(today.add(const Duration(days: 6)))
+      getFormattedDate(today, locale),
+      getFormattedDate(today.add(const Duration(days: 1)), locale),
+      getFormattedDate(today.add(const Duration(days: 2)), locale),
+      getFormattedDate(today.add(const Duration(days: 3)), locale),
+      getFormattedDate(today.add(const Duration(days: 4)), locale),
+      getFormattedDate(today.add(const Duration(days: 5)), locale),
+      getFormattedDate(today.add(const Duration(days: 6)), locale)
     ];
 
     return daysOfWeek;
+  }
+
+  String getFormattedDate(DateTime dateTime, [String locale = 'en_IN']) {
+    final dateFormat = DateFormat(DateFormat.WEEKDAY, locale);
+    return dateFormat.format(dateTime).substring(0, 1);
   }
 
   void onDayClick(DateTime date, {bool update = true}) {
