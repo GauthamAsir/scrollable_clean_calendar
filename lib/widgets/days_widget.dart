@@ -65,7 +65,7 @@ class DaysWidget extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       addRepaintBoundaries: false,
       padding: EdgeInsets.zero,
-      childAspectRatio: 1,
+      // childAspectRatio: 1.5,
       crossAxisSpacing: calendarCrossAxisSpacing,
       mainAxisSpacing: calendarMainAxisSpacing,
       shrinkWrap: true,
@@ -313,16 +313,19 @@ class DaysWidget extends StatelessWidget {
       );
     }
 
-    return DecoratedBox(
+    return Container(
+      // width: 28, height: 28,
       decoration: BoxDecoration(
         color: overlayBgColor,
         borderRadius: overlayBorderRadius,
+        // shape: BoxShape.circle
       ),
       child: Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: borderRadius,
+            // shape: BoxShape.circle
         ),
         child: Text(
           values.text,

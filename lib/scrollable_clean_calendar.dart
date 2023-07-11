@@ -11,7 +11,6 @@ import 'package:scrollable_clean_calendar/widgets/weekdays_widget.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class ScrollableCleanCalendar extends StatefulWidget {
-
   /// Listview direction
   final Axis scrollDirection;
 
@@ -124,8 +123,12 @@ class ScrollableCleanCalendar extends StatefulWidget {
 }
 
 class _ScrollableCleanCalendarState extends State<ScrollableCleanCalendar> {
+
+  late PageController pageController;
+
   @override
   void initState() {
+    pageController = widget.pageController ?? PageController();
     initializeDateFormatting();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final focusDate = widget.calendarController.initialFocusDate;
@@ -167,7 +170,8 @@ class _ScrollableCleanCalendarState extends State<ScrollableCleanCalendar> {
       padding: widget.padding ??
           const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
       child: PageView.builder(
-        controller: widget.pageController,
+        controller: pageController,
+        physics: const ClampingScrollPhysics(),
         scrollDirection: widget.scrollDirection,
         // separatorBuilder: (_, __) =>
         //     SizedBox(height: widget.spaceBetweenCalendars),
@@ -202,16 +206,73 @@ class _ScrollableCleanCalendarState extends State<ScrollableCleanCalendar> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: double.maxFinite,
-          child: MonthWidget(
-            month: month,
-            locale: widget.locale,
-            layout: widget.layout,
-            monthBuilder: widget.monthBuilder,
-            textAlign: widget.monthTextAlign,
-            textStyle: widget.monthTextStyle,
-          ),
+        Row(
+          children: [
+            InkWell(
+              onTap: () {
+                pageController.previousPage(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeInOut);
+                setState(() {
+
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                          offset: Offset(0, 1),
+                          spreadRadius: 0,
+                          blurRadius: 6,
+                          color: Color(0xff0000001a))
+                    ]),
+                child: const Icon(
+                  Icons.arrow_back_rounded,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            Expanded(
+              child: MonthWidget(
+                month: month,
+                locale: widget.locale,
+                layout: widget.layout,
+                monthBuilder: widget.monthBuilder,
+                textAlign: widget.monthTextAlign,
+                textStyle: widget.monthTextStyle,
+              ),
+            ),
+            InkWell(
+              onTap: () {
+                pageController.nextPage(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeInOut);
+                setState(() {
+
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                          offset: Offset(0, 1),
+                          spreadRadius: 0,
+                          blurRadius: 6,
+                          color: Color(0xff0000001a))
+                    ]),
+                child: const Icon(
+                  Icons.arrow_forward_rounded,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+          ],
         ),
         SizedBox(height: widget.spaceBetweenMonthAndCalendar),
         Column(

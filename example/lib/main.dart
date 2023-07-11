@@ -70,13 +70,14 @@ class MyApp extends StatelessWidget {
               child: ScrollableCleanCalendar(
                 calendarController: calendarController,
                 spaceBetweenMonthAndCalendar: 0,
+                padding: EdgeInsets.symmetric(horizontal: 24),
                 // scrollController: ScrollController(),
                 layout: Layout.BEAUTY,
                 dayRadius: 100,
                 daySelectedBackgroundColor: Colors.black,
                 daySelectedBackgroundColorBetween: Colors.black.withOpacity(.3),
                 dayTextStyle: TextStyle(fontSize: 14),
-                calendarMainAxisSpacing: 0,
+                calendarMainAxisSpacing: 5,
                 calendarCrossAxisSpacing: 0,
                 monthTextStyle: TextStyle(
                   color: Color(0xFF222222),
