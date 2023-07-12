@@ -11,6 +11,8 @@ import 'package:scrollable_clean_calendar/widgets/weekdays_widget.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class ScrollableCleanCalendar extends StatefulWidget {
+  final Color? pageNavigatorColor;
+
   /// Listview direction
   final Axis scrollDirection;
 
@@ -111,7 +113,8 @@ class ScrollableCleanCalendar extends StatefulWidget {
       this.dayRadius = 6,
       required this.calendarController,
       this.pageController,
-      this.scrollDirection = Axis.vertical})
+      this.scrollDirection = Axis.vertical,
+      this.pageNavigatorColor = Colors.white})
       : assert(layout != null ||
             (monthBuilder != null &&
                 weekdayBuilder != null &&
@@ -123,7 +126,6 @@ class ScrollableCleanCalendar extends StatefulWidget {
 }
 
 class _ScrollableCleanCalendarState extends State<ScrollableCleanCalendar> {
-
   late PageController pageController;
 
   @override
@@ -213,25 +215,28 @@ class _ScrollableCleanCalendarState extends State<ScrollableCleanCalendar> {
                 pageController.previousPage(
                     duration: const Duration(milliseconds: 250),
                     curve: Curves.easeInOut);
-                setState(() {
-
-                });
+                setState(() {});
               },
               child: Container(
                 padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
-                    color: Colors.white,
+                decoration: BoxDecoration(
+                    color: widget.pageNavigatorColor ?? Colors.white,
                     shape: BoxShape.circle,
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
                           offset: Offset(0, 1),
                           spreadRadius: 0,
                           blurRadius: 6,
                           color: Color(0xff0000001a))
                     ]),
-                child: const Icon(
+                child: Icon(
                   Icons.arrow_back_rounded,
-                  color: Colors.black,
+                  size: 16,
+                  color: widget.pageNavigatorColor != null
+                      ? (widget.pageNavigatorColor!.computeLuminance() > 0.5
+                          ? Colors.black
+                          : Colors.white)
+                      : Colors.black,
                 ),
               ),
             ),
@@ -250,25 +255,28 @@ class _ScrollableCleanCalendarState extends State<ScrollableCleanCalendar> {
                 pageController.nextPage(
                     duration: const Duration(milliseconds: 250),
                     curve: Curves.easeInOut);
-                setState(() {
-
-                });
+                setState(() {});
               },
               child: Container(
                 padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
-                    color: Colors.white,
+                decoration: BoxDecoration(
+                    color: widget.pageNavigatorColor ?? Colors.white,
                     shape: BoxShape.circle,
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
                           offset: Offset(0, 1),
                           spreadRadius: 0,
                           blurRadius: 6,
                           color: Color(0xff0000001a))
                     ]),
-                child: const Icon(
+                child: Icon(
                   Icons.arrow_forward_rounded,
-                  color: Colors.black,
+                  size: 16,
+                  color: widget.pageNavigatorColor != null
+                      ? (widget.pageNavigatorColor!.computeLuminance() > 0.5
+                          ? Colors.black
+                          : Colors.white)
+                      : Colors.black,
                 ),
               ),
             ),

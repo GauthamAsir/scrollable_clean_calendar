@@ -226,9 +226,9 @@ class DaysWidget extends StatelessWidget {
               ? Colors.black
               : Colors.white
           : Theme.of(context).colorScheme.onSurface,
-      fontWeight: values.isFirstDayOfWeek || values.isLastDayOfWeek
-          ? FontWeight.bold
-          : null,
+      // fontWeight: values.isFirstDayOfWeek || values.isLastDayOfWeek
+      //     ? FontWeight.bold
+      //     : null,
     );
 
     if (values.isSelected) {
@@ -288,9 +288,9 @@ class DaysWidget extends StatelessWidget {
             (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
           color:
               selectedBackgroundColor ?? Theme.of(context).colorScheme.primary,
-          fontWeight: values.isFirstDayOfWeek || values.isLastDayOfWeek
-              ? FontWeight.bold
-              : null,
+          // fontWeight: values.isFirstDayOfWeek || values.isLastDayOfWeek
+          //     ? FontWeight.bold
+          //     : null,
         );
       }
 
