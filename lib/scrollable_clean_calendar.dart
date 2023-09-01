@@ -88,10 +88,13 @@ class ScrollableCleanCalendar extends StatefulWidget {
   /// The controller of ScrollableCleanCalendar
   final CleanCalendarController calendarController;
 
+  final List<DateTime> blockedDatesList;
+
   const ScrollableCleanCalendar(
       {this.locale = 'en',
       this.scrollController,
       this.showWeekdays = true,
+      this.blockedDatesList = const [],
       this.layout,
       this.calendarCrossAxisSpacing = 4,
       this.calendarMainAxisSpacing = 4,
@@ -299,6 +302,7 @@ class _ScrollableCleanCalendarState extends State<ScrollableCleanCalendar> {
               builder: (_, __) {
                 return DaysWidget(
                   month: month,
+                  blockedDatesList: widget.blockedDatesList,
                   cleanCalendarController: widget.calendarController,
                   calendarCrossAxisSpacing: widget.calendarCrossAxisSpacing,
                   calendarMainAxisSpacing: widget.calendarMainAxisSpacing,

@@ -21,6 +21,7 @@ class DaysWidget extends StatelessWidget {
   final Color? dayDisableColor;
   final double radius;
   final TextStyle? textStyle;
+  final List<DateTime> blockedDatesList;
 
   const DaysWidget({
     Key? key,
@@ -37,6 +38,7 @@ class DaysWidget extends StatelessWidget {
     required this.dayDisableColor,
     required this.radius,
     required this.textStyle,
+    required this.blockedDatesList,
   }) : super(key: key);
 
   @override
@@ -93,6 +95,7 @@ class DaysWidget extends StatelessWidget {
 
         final dayValues = DayValues(
           day: day,
+          isBlocked: blockedDatesList.contains(day),
           isFirstDayOfWeek: day.weekday == cleanCalendarController.weekdayStart,
           isLastDayOfWeek: day.weekday == cleanCalendarController.weekdayEnd,
           isSelected: isSelected,
@@ -114,6 +117,10 @@ class DaysWidget extends StatelessWidget {
 
         return GestureDetector(
           onTap: () {
+            if (dayValues.isBlocked) {
+              return;
+            }
+
             if (day.isBefore(cleanCalendarController.minDate) &&
                 !day.isSameDay(cleanCalendarController.minDate)) {
               if (cleanCalendarController.onPreviousMinDateTapped != null) {
@@ -313,6 +320,17 @@ class DaysWidget extends StatelessWidget {
       );
     }
 
+    if (values.isBlocked) {
+      txtStyle = (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
+        color: dayDisableColor ??
+            Theme.of(context).colorScheme.onSurface.withOpacity(.5),
+        decoration: TextDecoration.lineThrough,
+        fontWeight: values.isFirstDayOfWeek || values.isLastDayOfWeek
+            ? FontWeight.bold
+            : null,
+      );
+    }
+
     return Container(
       // width: 28, height: 28,
       decoration: BoxDecoration(
@@ -325,7 +343,7 @@ class DaysWidget extends StatelessWidget {
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: borderRadius,
-            // shape: BoxShape.circle
+          // shape: BoxShape.circle
         ),
         child: Text(
           values.text,

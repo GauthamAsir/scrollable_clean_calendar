@@ -27,15 +27,17 @@ class DayValues {
   /// The max date
   final DateTime maxDate;
 
-  DayValues({
-    required this.day,
-    required this.text,
-    required this.isSelected,
-    required this.isFirstDayOfWeek,
-    required this.isLastDayOfWeek,
-    this.selectedMinDate,
-    this.selectedMaxDate,
-    required this.minDate,
-    required this.maxDate,
-  });
+  final bool isBlocked;
+
+  DayValues(
+      {required this.day,
+      required this.text,
+      required this.isSelected,
+      required this.isFirstDayOfWeek,
+      required this.isLastDayOfWeek,
+      this.selectedMinDate,
+      this.selectedMaxDate,
+      required this.minDate,
+      required this.maxDate,
+      required this.isBlocked});
 }
