@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scrollable_clean_calendar/controllers/clean_calendar_controller.dart';
+import 'package:scrollable_clean_calendar/models/booked_date_model.dart';
 import 'package:scrollable_clean_calendar/models/day_values_model.dart';
 import 'package:scrollable_clean_calendar/utils/enums.dart';
 import 'package:scrollable_clean_calendar/utils/extensions.dart';
@@ -22,24 +23,45 @@ class DaysWidget extends StatelessWidget {
   final double radius;
   final TextStyle? textStyle;
   final List<DateTime> blockedDatesList;
+  final bool strikeUnSelectableDates;
+  final bool beautifyBlockedDates;
+  final bool disableSelection;
+  final List<BookedDatesModel> bookedDates;
 
-  const DaysWidget({
-    Key? key,
-    required this.month,
-    required this.cleanCalendarController,
-    required this.calendarCrossAxisSpacing,
-    required this.calendarMainAxisSpacing,
-    required this.layout,
-    required this.dayBuilder,
-    required this.selectedBackgroundColor,
-    required this.backgroundColor,
-    required this.selectedBackgroundColorBetween,
-    required this.disableBackgroundColor,
-    required this.dayDisableColor,
-    required this.radius,
-    required this.textStyle,
-    required this.blockedDatesList,
-  }) : super(key: key);
+  const DaysWidget(
+      {Key? key,
+      required this.month,
+      required this.cleanCalendarController,
+      required this.calendarCrossAxisSpacing,
+      required this.beautifyBlockedDates,
+      required this.disableSelection,
+      required this.calendarMainAxisSpacing,
+      required this.layout,
+      required this.dayBuilder,
+      required this.selectedBackgroundColor,
+      required this.backgroundColor,
+      required this.selectedBackgroundColorBetween,
+      required this.disableBackgroundColor,
+      required this.dayDisableColor,
+      required this.radius,
+      required this.textStyle,
+      required this.blockedDatesList,
+      required this.strikeUnSelectableDates,
+      required this.bookedDates})
+      : super(key: key);
+
+  (bool, BookedDatesModel?) isDateBooked(DateTime inputDate) {
+    for (int i = 0; i < bookedDates.length; i++) {
+      var bookedDate = bookedDates[i];
+
+      // Check if the input date is between the start and end dates of the booked date
+      if (inputDate.isSameDayOrAfter(bookedDate.startDate) &&
+          inputDate.isSameDayOrBefore(bookedDate.endDate)) {
+        return (true, bookedDate); // Date is booked
+      }
+    }
+    return (false, null); // Date is available
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,9 +115,13 @@ class DaysWidget extends StatelessWidget {
 
         Widget widget;
 
+        var (a, b) = isDateBooked(day);
+
         final dayValues = DayValues(
           day: day,
           isBlocked: blockedDatesList.contains(day),
+          isBooked: a,
+          bookedDatesModel: b,
           isFirstDayOfWeek: day.weekday == cleanCalendarController.weekdayStart,
           isLastDayOfWeek: day.weekday == cleanCalendarController.weekdayEnd,
           isSelected: isSelected,
@@ -117,7 +143,7 @@ class DaysWidget extends StatelessWidget {
 
         return GestureDetector(
           onTap: () {
-            if (dayValues.isBlocked) {
+            if (dayValues.isBlocked || disableSelection) {
               return;
             }
 
@@ -187,8 +213,9 @@ class DaysWidget extends StatelessWidget {
       txtStyle = (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
         color: selectedBackgroundColor ?? Theme.of(context).colorScheme.primary,
       );
-    } else if (values.day.isBefore(values.minDate) ||
-        values.day.isAfter(values.maxDate)) {
+    } else if ((values.day.isBefore(values.minDate) ||
+            values.day.isAfter(values.maxDate)) &&
+        strikeUnSelectableDates) {
       bgColor = disableBackgroundColor ??
           Theme.of(context).colorScheme.surface.withOpacity(.4);
       txtStyle = (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
@@ -238,7 +265,7 @@ class DaysWidget extends StatelessWidget {
       //     : null,
     );
 
-    if (values.isSelected) {
+    if (values.isSelected && !values.isBooked) {
       if (values.isFirstDayOfWeek) {
         // borderRadius = BorderRadius.all(Radius.circular(radius));
         borderRadius = BorderRadius.only(
@@ -313,7 +340,7 @@ class DaysWidget extends StatelessWidget {
       txtStyle = (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
         color: dayDisableColor ??
             Theme.of(context).colorScheme.onSurface.withOpacity(.5),
-        decoration: TextDecoration.lineThrough,
+        decoration: strikeUnSelectableDates ? TextDecoration.lineThrough : null,
         fontWeight: values.isFirstDayOfWeek || values.isLastDayOfWeek
             ? FontWeight.bold
             : null,
@@ -324,11 +351,114 @@ class DaysWidget extends StatelessWidget {
       txtStyle = (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
         color: dayDisableColor ??
             Theme.of(context).colorScheme.onSurface.withOpacity(.5),
-        decoration: TextDecoration.lineThrough,
+        decoration: strikeUnSelectableDates ? TextDecoration.lineThrough : null,
         fontWeight: values.isFirstDayOfWeek || values.isLastDayOfWeek
             ? FontWeight.bold
             : null,
       );
+    }
+
+    if (bookedDates.isNotEmpty &&
+        beautifyBlockedDates &&
+        values.isBooked &&
+        values.bookedDatesModel != null) {
+      bool isSelected =
+          values.day.isSameDayOrAfter(values.bookedDatesModel!.startDate) &&
+              values.day.isSameDayOrBefore(values.bookedDatesModel!.endDate);
+
+      if (isSelected) {
+        if (values.isFirstDayOfWeek) {
+          // borderRadius = BorderRadius.all(Radius.circular(radius));
+          borderRadius = BorderRadius.only(
+            topLeft: Radius.circular(radius),
+            bottomLeft: Radius.circular(radius),
+          );
+        } else if (values.isLastDayOfWeek) {
+          // borderRadius = BorderRadius.all(Radius.circular(radius));
+          borderRadius = BorderRadius.only(
+            topRight: Radius.circular(radius),
+            bottomRight: Radius.circular(radius),
+          );
+        }
+
+        print('------->>');
+        print(values.day.toString());
+        print(values.bookedDatesModel!.startDate.toString());
+        print(values.bookedDatesModel!.endDate.toString());
+
+        if ((values.bookedDatesModel != null &&
+                values.day.isSameDay(values.bookedDatesModel!.startDate)) ||
+            (values.bookedDatesModel != null &&
+                values.day.isSameDay(values.bookedDatesModel!.endDate))) {
+          bgColor = values.bookedDatesModel?.bgColor ??
+              Theme.of(context).colorScheme.primary;
+          overlayBgColor = (values.bookedDatesModel?.bgColor ??
+                  Theme.of(context).colorScheme.primary)
+              .withOpacity(.3);
+          txtStyle =
+              (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
+            color: selectedBackgroundColor != null
+                ? selectedBackgroundColor!.computeLuminance() > .5
+                    ? Colors.black
+                    : Colors.white
+                : Theme.of(context).colorScheme.onPrimary,
+            fontWeight: FontWeight.bold,
+          );
+
+          if (values.bookedDatesModel!.startDate ==
+              values.bookedDatesModel!.endDate) {
+            borderRadius = BorderRadius.circular(radius);
+          } else if (values.bookedDatesModel != null &&
+              values.day.isSameDay(values.bookedDatesModel!.startDate)) {
+            borderRadius = BorderRadius.all(Radius.circular(radius));
+            overlayBorderRadius = BorderRadius.only(
+              topLeft: Radius.circular(radius),
+              bottomLeft: Radius.circular(radius),
+            );
+          } else if (values.bookedDatesModel != null &&
+              values.day.isSameDay(values.bookedDatesModel!.endDate)) {
+            borderRadius = BorderRadius.all(Radius.circular(radius));
+            overlayBorderRadius = BorderRadius.only(
+              topRight: Radius.circular(radius),
+              bottomRight: Radius.circular(radius),
+            );
+          }
+        } else {
+          bgColor = (values.bookedDatesModel?.bgColor ??
+                  Theme.of(context).colorScheme.primary)
+              .withOpacity(.3);
+          txtStyle =
+              (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
+            color: selectedBackgroundColor ??
+                Theme.of(context).colorScheme.primary,
+            // fontWeight: values.isFirstDayOfWeek || values.isLastDayOfWeek
+            //     ? FontWeight.bold
+            //     : null,
+          );
+        }
+        // overlayBorderRadius = BorderRadius.zero;
+        // overlayBorderRadius = BorderRadius.all(Radius.circular(radius));
+
+        // if (values.selectedMinDate != null && values.selectedMaxDate == null) {
+        //   overlayBorderRadius = BorderRadius.all(Radius.circular(radius));
+        // } else if (values.selectedMinDate == null &&
+        //     values.selectedMaxDate != null) {
+        //   overlayBorderRadius = BorderRadius.all(Radius.circular(radius));
+        // }
+      } else if (values.day.isSameDay(values.minDate)) {
+      } else if (values.day.isBefore(values.bookedDatesModel!.startDate) ||
+          values.day.isAfter(values.maxDate)) {
+        txtStyle =
+            (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
+          color: dayDisableColor ??
+              Theme.of(context).colorScheme.onSurface.withOpacity(.5),
+          decoration:
+              strikeUnSelectableDates ? TextDecoration.lineThrough : null,
+          fontWeight: values.isFirstDayOfWeek || values.isLastDayOfWeek
+              ? FontWeight.bold
+              : null,
+        );
+      }
     }
 
     return Container(

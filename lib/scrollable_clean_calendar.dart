@@ -10,6 +10,8 @@ import 'package:scrollable_clean_calendar/widgets/month_widget.dart';
 import 'package:scrollable_clean_calendar/widgets/weekdays_widget.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
+import 'models/booked_date_model.dart';
+
 class ScrollableCleanCalendar extends StatefulWidget {
   final Color? pageNavigatorColor;
 
@@ -90,11 +92,23 @@ class ScrollableCleanCalendar extends StatefulWidget {
 
   final List<DateTime> blockedDatesList;
 
+  final bool strikeUnSelectableDates;
+
+  final bool beautifyBlockedDates;
+
+  final bool disableSelection;
+
+  final List<BookedDatesModel> bookedDates;
+
   const ScrollableCleanCalendar(
       {this.locale = 'en',
       this.scrollController,
       this.showWeekdays = true,
+      this.beautifyBlockedDates = false,
+      this.disableSelection = false,
       this.blockedDatesList = const [],
+      this.bookedDates = const [],
+      this.strikeUnSelectableDates = true,
       this.layout,
       this.calendarCrossAxisSpacing = 4,
       this.calendarMainAxisSpacing = 4,
@@ -303,6 +317,10 @@ class _ScrollableCleanCalendarState extends State<ScrollableCleanCalendar> {
                 return DaysWidget(
                   month: month,
                   blockedDatesList: widget.blockedDatesList,
+                  strikeUnSelectableDates: widget.strikeUnSelectableDates,
+                  disableSelection: widget.disableSelection,
+                  beautifyBlockedDates: widget.beautifyBlockedDates,
+                  bookedDates: widget.bookedDates,
                   cleanCalendarController: widget.calendarController,
                   calendarCrossAxisSpacing: widget.calendarCrossAxisSpacing,
                   calendarMainAxisSpacing: widget.calendarMainAxisSpacing,

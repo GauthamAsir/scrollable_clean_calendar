@@ -1,3 +1,5 @@
+import 'booked_date_model.dart';
+
 class DayValues {
   /// The current day in layout
   final DateTime day;
@@ -29,6 +31,9 @@ class DayValues {
 
   final bool isBlocked;
 
+  final bool isBooked;
+  final BookedDatesModel? bookedDatesModel;
+
   DayValues(
       {required this.day,
       required this.text,
@@ -39,5 +44,7 @@ class DayValues {
       this.selectedMaxDate,
       required this.minDate,
       required this.maxDate,
-      required this.isBlocked});
+      required this.isBlocked,
+      required this.isBooked,
+      this.bookedDatesModel});
 }
