@@ -100,6 +100,8 @@ class ScrollableCleanCalendar extends StatefulWidget {
 
   final List<BookedDatesModel> bookedDates;
 
+  final Function(DateTime dateTime)? onMonthChanged;
+
   const ScrollableCleanCalendar(
       {this.locale = 'en',
       this.scrollController,
@@ -131,7 +133,8 @@ class ScrollableCleanCalendar extends StatefulWidget {
       required this.calendarController,
       this.pageController,
       this.scrollDirection = Axis.vertical,
-      this.pageNavigatorColor = Colors.white})
+      this.pageNavigatorColor = Colors.white,
+      this.onMonthChanged})
       : assert(layout != null ||
             (monthBuilder != null &&
                 weekdayBuilder != null &&
@@ -192,6 +195,11 @@ class _ScrollableCleanCalendarState extends State<ScrollableCleanCalendar> {
         controller: pageController,
         physics: const ClampingScrollPhysics(),
         scrollDirection: widget.scrollDirection,
+        onPageChanged: (index) {
+          if (widget.onMonthChanged != null) {
+            widget.onMonthChanged!(widget.calendarController.months[index]);
+          }
+        },
         // separatorBuilder: (_, __) =>
         //     SizedBox(height: widget.spaceBetweenCalendars),
         itemCount: widget.calendarController.months.length,
@@ -228,8 +236,8 @@ class _ScrollableCleanCalendarState extends State<ScrollableCleanCalendar> {
         Row(
           children: [
             InkWell(
-              onTap: () {
-                pageController.previousPage(
+              onTap: () async {
+                await pageController.previousPage(
                     duration: const Duration(milliseconds: 250),
                     curve: Curves.easeInOut);
                 setState(() {});
