@@ -263,6 +263,9 @@ class DaysWidget extends StatelessWidget {
       // fontWeight: values.isFirstDayOfWeek || values.isLastDayOfWeek
       //     ? FontWeight.bold
       //     : null,
+      fontSize: 14,
+      height: 0.07,
+      fontWeight: FontWeight.w400,
     );
 
     if (values.isSelected && !values.isBooked) {
@@ -452,6 +455,8 @@ class DaysWidget extends StatelessWidget {
             (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
           color: dayDisableColor ??
               Theme.of(context).colorScheme.onSurface.withOpacity(.5),
+          fontSize: 14,
+          height: 0.07,
           decoration:
               strikeUnSelectableDates ? TextDecoration.lineThrough : null,
           fontWeight: values.isFirstDayOfWeek || values.isLastDayOfWeek

@@ -222,4 +222,17 @@ class CleanCalendarController extends ChangeNotifier {
         ((date.year - minDate.year) * 12) - minDate.month + date.month;
     itemScrollController.jumpTo(index: month, alignment: alignment);
   }
+
+  int? jumpToMonthPageView({required DateTime date, double alignment = 0}) {
+    if (!(date.year >= minDate.year &&
+        (date.year > minDate.year || date.month >= minDate.month) &&
+        date.year <= maxDate.year &&
+        (date.year < maxDate.year || date.month <= maxDate.month))) {
+      return null;
+    }
+    final month =
+        ((date.year - minDate.year) * 12) - minDate.month + date.month;
+    // itemScrollController.jumpTo(index: month, alignment: alignment);
+    return month;
+  }
 }
