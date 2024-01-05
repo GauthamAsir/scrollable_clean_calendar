@@ -158,12 +158,20 @@ class _ScrollableCleanCalendarState extends State<ScrollableCleanCalendar> {
       final focusDate = widget.calendarController.initialFocusDate;
       final initialDateSelected = widget.calendarController.initialDateSelected;
       if (focusDate != null) {
-        widget.calendarController.jumpToMonth(date: focusDate);
+        if (widget.scrollDirection == Axis.vertical) {
+          widget.calendarController.jumpToMonth(date: focusDate);
+        } else {
+          var res =
+              widget.calendarController.jumpToMonthPageView(date: focusDate);
+          if (res != null && res != 0) {
+            currentMonth = res;
+            pageController.jumpToPage(res);
+          }
+        }
       }
       if (initialDateSelected != null) {
         var res = widget.calendarController
             .jumpToMonthPageView(date: initialDateSelected);
-        print(res);
         if (res != null && res != 0) {
           currentMonth = res;
           pageController.jumpToPage(res);

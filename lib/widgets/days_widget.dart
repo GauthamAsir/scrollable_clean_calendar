@@ -4,6 +4,7 @@ import 'package:scrollable_clean_calendar/models/booked_date_model.dart';
 import 'package:scrollable_clean_calendar/models/day_values_model.dart';
 import 'package:scrollable_clean_calendar/utils/enums.dart';
 import 'package:scrollable_clean_calendar/utils/extensions.dart';
+import 'package:scrollable_clean_calendar/widgets/network_image_item.dart';
 
 class DaysWidget extends StatelessWidget {
   final CleanCalendarController cleanCalendarController;
@@ -50,17 +51,20 @@ class DaysWidget extends StatelessWidget {
       required this.bookedDates})
       : super(key: key);
 
-  (bool, BookedDatesModel?) isDateBooked(DateTime inputDate) {
+  (bool, List<BookedDatesModel>) isDateBooked(DateTime inputDate) {
+    List<BookedDatesModel> ls = [];
+
     for (int i = 0; i < bookedDates.length; i++) {
       var bookedDate = bookedDates[i];
 
       // Check if the input date is between the start and end dates of the booked date
+
       if (inputDate.isSameDayOrAfter(bookedDate.startDate) &&
           inputDate.isSameDayOrBefore(bookedDate.endDate)) {
-        return (true, bookedDate); // Date is booked
+        ls.add(bookedDate);
       }
     }
-    return (false, null); // Date is available
+    return (ls.isNotEmpty, ls); // Date is available
   }
 
   @override
@@ -117,6 +121,11 @@ class DaysWidget extends StatelessWidget {
 
         var (a, b) = isDateBooked(day);
 
+        // if (a) {
+        //   print(
+        //       '==========>> ${b.length} :::: ${b.first.startDate} -- ${b.first.endDate}');
+        // }
+
         final dayValues = DayValues(
           day: day,
           isBlocked: blockedDatesList.contains(day),
@@ -137,7 +146,9 @@ class DaysWidget extends StatelessWidget {
         } else {
           widget = <Layout, Widget Function()>{
             Layout.DEFAULT: () => _pattern(context, dayValues),
-            Layout.BEAUTY: () => _beauty(context, dayValues),
+            Layout.BEAUTY: () {
+              return _beauty(context, dayValues);
+            },
           }[layout]!();
         }
 
@@ -172,11 +183,8 @@ class DaysWidget extends StatelessWidget {
     Color bgColor = backgroundColor ?? Theme.of(context).colorScheme.surface;
     TextStyle txtStyle =
         (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
-      color: backgroundColor != null
-          ? backgroundColor!.computeLuminance() > .5
-              ? Colors.black
-              : Colors.white
-          : Theme.of(context).colorScheme.onSurface,
+      color: getSurfaceColor(
+          backgroundColor ?? Theme.of(context).colorScheme.onSurface),
     );
 
     if (values.isSelected) {
@@ -188,30 +196,26 @@ class DaysWidget extends StatelessWidget {
             selectedBackgroundColor ?? Theme.of(context).colorScheme.primary;
         txtStyle =
             (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
-          color: selectedBackgroundColor != null
-              ? selectedBackgroundColor!.computeLuminance() > .5
-                  ? Colors.black
-                  : Colors.white
-              : Theme.of(context).colorScheme.onPrimary,
+          color: getSurfaceColor(selectedBackgroundColor ??
+              Theme.of(context).colorScheme.onPrimary),
         );
       } else {
         bgColor = selectedBackgroundColorBetween ??
-            Theme.of(context).colorScheme.primary.withOpacity(.3);
+            Theme.of(context).colorScheme.primary.withOpacity(.2);
         txtStyle =
             (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
-          color: selectedBackgroundColor != null &&
+          color: getSurfaceColor(selectedBackgroundColor != null &&
                   selectedBackgroundColor == selectedBackgroundColorBetween
-              ? selectedBackgroundColor!.computeLuminance() > .5
-                  ? Colors.black
-                  : Colors.white
+              ? selectedBackgroundColor!
               : selectedBackgroundColor ??
-                  Theme.of(context).colorScheme.primary,
+                  Theme.of(context).colorScheme.primary),
         );
       }
     } else if (values.day.isSameDay(values.minDate)) {
       bgColor = Colors.transparent;
       txtStyle = (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
-        color: selectedBackgroundColor ?? Theme.of(context).colorScheme.primary,
+        color: getSurfaceColor(
+            selectedBackgroundColor ?? Theme.of(context).colorScheme.primary),
       );
     } else if ((values.day.isBefore(values.minDate) ||
             values.day.isAfter(values.maxDate)) &&
@@ -219,8 +223,8 @@ class DaysWidget extends StatelessWidget {
       bgColor = disableBackgroundColor ??
           Theme.of(context).colorScheme.surface.withOpacity(.4);
       txtStyle = (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
-        color: dayDisableColor ??
-            Theme.of(context).colorScheme.onSurface.withOpacity(.5),
+        color: getSurfaceColor(dayDisableColor ??
+            Theme.of(context).colorScheme.onSurface.withOpacity(.5)),
         decoration: TextDecoration.lineThrough,
       );
     }
@@ -246,20 +250,27 @@ class DaysWidget extends StatelessWidget {
     );
   }
 
+  Color getSurfaceColor(Color color) {
+    return color.computeLuminance() < .5 ? Colors.black : Colors.white;
+  }
+
   Widget _beauty(BuildContext context, DayValues values) {
     BorderRadiusGeometry? borderRadius;
     Color bgColor = Colors.transparent;
 
+    bool showIcon = false;
+    String iconLink = '';
+
     BorderRadiusGeometry? overlayBorderRadius;
     Color overlayBgColor = Colors.transparent;
 
+    BorderRadiusGeometry? extraOverlayBorderRadius;
+    Color extraOverlayBgColor = Colors.transparent;
+
     TextStyle txtStyle =
         (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
-      color: backgroundColor != null
-          ? backgroundColor!.computeLuminance() > .5
-              ? Colors.black
-              : Colors.white
-          : Theme.of(context).colorScheme.onSurface,
+      color: getSurfaceColor(
+          backgroundColor ?? Theme.of(context).colorScheme.onSurface),
       // fontWeight: values.isFirstDayOfWeek || values.isLastDayOfWeek
       //     ? FontWeight.bold
       //     : null,
@@ -290,14 +301,11 @@ class DaysWidget extends StatelessWidget {
         bgColor =
             selectedBackgroundColor ?? Theme.of(context).colorScheme.primary;
         overlayBgColor = selectedBackgroundColorBetween ??
-            Theme.of(context).colorScheme.primary.withOpacity(.3);
+            Theme.of(context).colorScheme.primary.withOpacity(.2);
         txtStyle =
             (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
-          color: selectedBackgroundColor != null
-              ? selectedBackgroundColor!.computeLuminance() > .5
-                  ? Colors.black
-                  : Colors.white
-              : Theme.of(context).colorScheme.onPrimary,
+          color: getSurfaceColor(selectedBackgroundColor ??
+              Theme.of(context).colorScheme.onPrimary),
           fontWeight: FontWeight.bold,
         );
 
@@ -320,11 +328,11 @@ class DaysWidget extends StatelessWidget {
         }
       } else {
         bgColor = selectedBackgroundColorBetween ??
-            Theme.of(context).colorScheme.primary.withOpacity(.3);
+            Theme.of(context).colorScheme.primary.withOpacity(.2);
         txtStyle =
             (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
-          color:
-              selectedBackgroundColor ?? Theme.of(context).colorScheme.primary,
+          color: getSurfaceColor(
+              selectedBackgroundColor ?? Theme.of(context).colorScheme.primary),
           // fontWeight: values.isFirstDayOfWeek || values.isLastDayOfWeek
           //     ? FontWeight.bold
           //     : null,
@@ -341,8 +349,8 @@ class DaysWidget extends StatelessWidget {
     } else if (values.day.isBefore(values.minDate) ||
         values.day.isAfter(values.maxDate)) {
       txtStyle = (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
-        color: dayDisableColor ??
-            Theme.of(context).colorScheme.onSurface.withOpacity(.5),
+        color: getSurfaceColor(dayDisableColor ??
+            Theme.of(context).colorScheme.onSurface.withOpacity(.5)),
         decoration: strikeUnSelectableDates ? TextDecoration.lineThrough : null,
         fontWeight: values.isFirstDayOfWeek || values.isLastDayOfWeek
             ? FontWeight.bold
@@ -352,8 +360,8 @@ class DaysWidget extends StatelessWidget {
 
     if (values.isBlocked) {
       txtStyle = (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
-        color: dayDisableColor ??
-            Theme.of(context).colorScheme.onSurface.withOpacity(.5),
+        color: getSurfaceColor(dayDisableColor ??
+            Theme.of(context).colorScheme.onSurface.withOpacity(.5)),
         decoration: strikeUnSelectableDates ? TextDecoration.lineThrough : null,
         fontWeight: values.isFirstDayOfWeek || values.isLastDayOfWeek
             ? FontWeight.bold
@@ -364,10 +372,10 @@ class DaysWidget extends StatelessWidget {
     if (bookedDates.isNotEmpty &&
         beautifyBlockedDates &&
         values.isBooked &&
-        values.bookedDatesModel != null) {
-      bool isSelected =
-          values.day.isSameDayOrAfter(values.bookedDatesModel!.startDate) &&
-              values.day.isSameDayOrBefore(values.bookedDatesModel!.endDate);
+        values.bookedDatesModel.isNotEmpty) {
+      bool isSelected = values.day
+              .isSameDayOrAfter(values.bookedDatesModel.first.startDate) &&
+          values.day.isSameDayOrBefore(values.bookedDatesModel.first.endDate);
 
       if (isSelected) {
         if (values.isFirstDayOfWeek) {
@@ -384,56 +392,79 @@ class DaysWidget extends StatelessWidget {
           );
         }
 
-        print('------->>');
-        print(values.day.toString());
-        print(values.bookedDatesModel!.startDate.toString());
-        print(values.bookedDatesModel!.endDate.toString());
-
-        if ((values.bookedDatesModel != null &&
-                values.day.isSameDay(values.bookedDatesModel!.startDate)) ||
-            (values.bookedDatesModel != null &&
-                values.day.isSameDay(values.bookedDatesModel!.endDate))) {
-          bgColor = values.bookedDatesModel?.bgColor ??
+        if ((values.day.isSameDay(values.bookedDatesModel.first.startDate)) ||
+            (values.day.isSameDay(values.bookedDatesModel.first.endDate))) {
+          bgColor = values.bookedDatesModel.first.bgColor ??
               Theme.of(context).colorScheme.primary;
-          overlayBgColor = (values.bookedDatesModel?.bgColor ??
+
+          overlayBgColor = (values.bookedDatesModel.first.bgColor ??
                   Theme.of(context).colorScheme.primary)
-              .withOpacity(.3);
+              .withOpacity(.2);
           txtStyle =
               (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
-            color: selectedBackgroundColor != null
-                ? selectedBackgroundColor!.computeLuminance() > .5
-                    ? Colors.black
-                    : Colors.white
-                : Theme.of(context).colorScheme.onPrimary,
+            color: getSurfaceColor(selectedBackgroundColor ??
+                Theme.of(context).colorScheme.onPrimary),
             fontWeight: FontWeight.bold,
           );
 
-          if (values.bookedDatesModel!.startDate ==
-              values.bookedDatesModel!.endDate) {
+          if (values.bookedDatesModel.first.startDate ==
+              values.bookedDatesModel.first.endDate) {
             borderRadius = BorderRadius.circular(radius);
-          } else if (values.bookedDatesModel != null &&
-              values.day.isSameDay(values.bookedDatesModel!.startDate)) {
+          } else if (values.day
+              .isSameDay(values.bookedDatesModel.first.startDate)) {
             borderRadius = BorderRadius.all(Radius.circular(radius));
             overlayBorderRadius = BorderRadius.only(
               topLeft: Radius.circular(radius),
               bottomLeft: Radius.circular(radius),
             );
-          } else if (values.bookedDatesModel != null &&
-              values.day.isSameDay(values.bookedDatesModel!.endDate)) {
+          } else if (values.day
+              .isSameDay(values.bookedDatesModel.first.endDate)) {
             borderRadius = BorderRadius.all(Radius.circular(radius));
             overlayBorderRadius = BorderRadius.only(
               topRight: Radius.circular(radius),
               bottomRight: Radius.circular(radius),
             );
           }
+
+          if (values.day.isSameDay(values.bookedDatesModel.first.startDate)) {
+            showIcon = true;
+            iconLink = values.bookedDatesModel.first.icon ?? '';
+          }
+
+          if (values.day.isSameDay(values.bookedDatesModel.first.endDate)) {
+            if (values.bookedDatesModel.length > 1) {
+              if (values.day.isSameDay(values.bookedDatesModel[1].startDate)) {
+                showIcon = true;
+                iconLink = values.bookedDatesModel[1].icon ?? '';
+                borderRadius = BorderRadius.circular(radius);
+                overlayBorderRadius = BorderRadius.only(
+                  topLeft: Radius.circular(radius),
+                  bottomLeft: Radius.circular(radius),
+                );
+                overlayBgColor = (values.bookedDatesModel[1].bgColor ??
+                        Theme.of(context).colorScheme.primary)
+                    .withOpacity(.2);
+
+                extraOverlayBgColor = (values.bookedDatesModel.first.bgColor ??
+                        Theme.of(context).colorScheme.primary)
+                    .withOpacity(.2);
+                extraOverlayBorderRadius = BorderRadius.only(
+                  topRight: Radius.circular(radius),
+                  bottomRight: Radius.circular(radius),
+                );
+
+                // overlayBorderRadius = BorderRadius.circular(radius);
+              }
+            }
+          }
         } else {
-          bgColor = (values.bookedDatesModel?.bgColor ??
+          bgColor = (values.bookedDatesModel.first.bgColor ??
                   Theme.of(context).colorScheme.primary)
-              .withOpacity(.3);
+              .withOpacity(.2);
           txtStyle =
               (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
-            color: selectedBackgroundColor ??
-                Theme.of(context).colorScheme.primary,
+            color: getSurfaceColor(selectedBackgroundColor ??
+                Theme.of(context).colorScheme.primary),
             // fontWeight: values.isFirstDayOfWeek || values.isLastDayOfWeek
             //     ? FontWeight.bold
             //     : null,
@@ -449,12 +480,12 @@ class DaysWidget extends StatelessWidget {
         //   overlayBorderRadius = BorderRadius.all(Radius.circular(radius));
         // }
       } else if (values.day.isSameDay(values.minDate)) {
-      } else if (values.day.isBefore(values.bookedDatesModel!.startDate) ||
+      } else if (values.day.isBefore(values.bookedDatesModel.first.startDate) ||
           values.day.isAfter(values.maxDate)) {
         txtStyle =
             (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
-          color: dayDisableColor ??
-              Theme.of(context).colorScheme.onSurface.withOpacity(.5),
+          color: getSurfaceColor(dayDisableColor ??
+              Theme.of(context).colorScheme.onSurface.withOpacity(.5)),
           fontSize: 14,
           height: 0.07,
           decoration:
@@ -467,24 +498,36 @@ class DaysWidget extends StatelessWidget {
     }
 
     return Container(
-      // width: 28, height: 28,
       decoration: BoxDecoration(
-        color: overlayBgColor,
-        borderRadius: overlayBorderRadius,
+        color: extraOverlayBgColor,
+        borderRadius: extraOverlayBorderRadius,
         // shape: BoxShape.circle
       ),
       child: Container(
-        alignment: Alignment.center,
+        // width: 28, height: 28,
         decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: borderRadius,
+          color: overlayBgColor,
+          borderRadius: overlayBorderRadius,
           // shape: BoxShape.circle
         ),
-        child: Text(
-          values.text,
-          textAlign: TextAlign.center,
-          style: txtStyle,
-        ),
+        child: showIcon
+            ? CachedNetworkImageItem(
+                iconLink,
+                radius: 100,
+              )
+            : Container(
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  borderRadius: borderRadius,
+                  // shape: BoxShape.circle
+                ),
+                child: Text(
+                  values.text,
+                  textAlign: TextAlign.center,
+                  style: txtStyle,
+                ),
+              ),
       ),
     );
   }

@@ -32,7 +32,7 @@ class DayValues {
   final bool isBlocked;
 
   final bool isBooked;
-  final BookedDatesModel? bookedDatesModel;
+  final List<BookedDatesModel> bookedDatesModel;
 
   DayValues(
       {required this.day,
@@ -46,5 +46,5 @@ class DayValues {
       required this.maxDate,
       required this.isBlocked,
       required this.isBooked,
-      this.bookedDatesModel});
+      this.bookedDatesModel = const []});
 }
