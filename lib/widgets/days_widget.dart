@@ -200,15 +200,13 @@ class DaysWidget extends StatelessWidget {
               Theme.of(context).colorScheme.onPrimary),
         );
       } else {
-        bgColor = selectedBackgroundColorBetween ??
-            Theme.of(context).colorScheme.primary.withOpacity(.2);
+        bgColor = (selectedBackgroundColorBetween ??
+                Theme.of(context).colorScheme.primary)
+            .withOpacity(.2);
         txtStyle =
             (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
-          color: getSurfaceColor(selectedBackgroundColor != null &&
-                  selectedBackgroundColor == selectedBackgroundColorBetween
-              ? selectedBackgroundColor!
-              : selectedBackgroundColor ??
-                  Theme.of(context).colorScheme.primary),
+          color: getSurfaceColor(
+              selectedBackgroundColor ?? Theme.of(context).colorScheme.primary),
         );
       }
     } else if (values.day.isSameDay(values.minDate)) {
@@ -300,8 +298,9 @@ class DaysWidget extends StatelessWidget {
               values.day.isSameDay(values.selectedMaxDate!))) {
         bgColor =
             selectedBackgroundColor ?? Theme.of(context).colorScheme.primary;
-        overlayBgColor = selectedBackgroundColorBetween ??
-            Theme.of(context).colorScheme.primary.withOpacity(.2);
+        overlayBgColor = (selectedBackgroundColorBetween ??
+                Theme.of(context).colorScheme.primary)
+            .withOpacity(.2);
         txtStyle =
             (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
           color: getSurfaceColor(selectedBackgroundColor ??
@@ -327,8 +326,9 @@ class DaysWidget extends StatelessWidget {
           );
         }
       } else {
-        bgColor = selectedBackgroundColorBetween ??
-            Theme.of(context).colorScheme.primary.withOpacity(.2);
+        bgColor = (selectedBackgroundColorBetween ??
+                Theme.of(context).colorScheme.primary)
+            .withOpacity(.2);
         txtStyle =
             (textStyle ?? Theme.of(context).textTheme.bodyLarge)!.copyWith(
           color: getSurfaceColor(
